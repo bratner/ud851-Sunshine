@@ -23,6 +23,7 @@ import android.widget.TextView;
 
 import com.example.android.sunshine.data.SunshinePreferences;
 import com.example.android.sunshine.utilities.NetworkUtils;
+import com.example.android.sunshine.utilities.OpenWeatherJsonUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -99,16 +100,21 @@ public class MainActivity extends AppCompatActivity {
     // done (5) Create a class that extends AsyncTask to perform network requests
     // done (6) Override the doInBackground method to perform your network requests
     // done (7) Override the onPostExecute method to display the results of the network request
-    public class WeatherFetcher extends AsyncTask<URL, Void, String > {
+    public class WeatherFetcher extends AsyncTask<URL, Void, String[] > {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
         }
 
         @Override
-        protected String doInBackground(URL... urls) {
+        protected String[] doInBackground(URL... urls) {
             try {
-               return NetworkUtils.getResponseFromHttpUrl(urls[0]);
+               String raw_json = NetworkUtils.getResponseFromHttpUrl(urls[0]);
+                try {
+                   return  OpenWeatherJsonUtils.getSimpleWeatherStringsFromJson(MainActivity.this, raw_json);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -116,41 +122,50 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
-        protected void onPostExecute(String s) {
-            /* Run some Json parsing and list filling on s */
-            DateFormatSymbols dfs = new DateFormatSymbols();
-            try {
-                JSONObject top = new JSONObject(s);
-                int listSize = Integer.parseInt(top.getString("cnt"));
-                JSONArray list = top.getJSONArray("list");
-                if (list.length() != listSize)
-                    Log.w("BRAT", "Mismatch of list sizes!");
-
-                for(int i=0; i<list.length();i++)
-                {
-                    JSONObject weather_line = list.getJSONObject(i);
-                    Date d = new Date(Long.parseLong(weather_line.getString("dt"))*1000);
-                    int day_of_week = d.getDay();
-                    int day_of_month = d.getDate();
-                    int month = d.getMonth();
-
-                    JSONObject temp = weather_line.getJSONObject("temp");
-                    String day = temp.getString("day");
-                    String night = temp.getString("night");
-                    String month_name = dfs.getShortMonths()[month];
-                    String day_name = dfs.getShortWeekdays()[day_of_week+1];
-                    JSONObject weather = weather_line.getJSONArray("weather").getJSONObject(0);
-                    String description = weather.getString("description");
-                    mWeatherTextView.append(day_name + " " +month_name +", "+Integer.toString(day_of_month)+
-                            " - " + description + " - "+day+"°C / "+night+"°C" + "\n\n\n");
-                  //  May 28 - Meteors - 16°C / 7°C"
-
+        protected void onPostExecute(String[] sarr) {
+                for(String s: sarr) {
+                    mWeatherTextView.append(s+"\n\n\n");
                 }
-            } catch (JSONException e) {
-                Log.e("BRAT", "Error parsing json: " + s);
-                e.printStackTrace();
-            }
-
         }
+        //
+//        protected void onPostExecute(String s) {
+//            /* Run some Json parsing and list filling on s */
+//            DateFormatSymbols dfs = new DateFormatSymbols();
+//            try {
+//                JSONObject top = new JSONObject(s);
+//                int listSize = Integer.parseInt(top.getString("cnt"));
+//                JSONArray list = top.getJSONArray("list");
+//                if (list.length() != listSize)
+//                    Log.w("BRAT", "Mismatch of list sizes!");
+//
+//                for(int i=0; i<list.length();i++)
+//                {
+//                    JSONObject weather_line = list.getJSONObject(i);
+//                    Date d = new Date(Long.parseLong(weather_line.getString("dt"))*1000);
+//                    int day_of_week = d.getDay();
+//                    int day_of_month = d.getDate();
+//                    int month = d.getMonth();
+//
+//                    JSONObject temp = weather_line.getJSONObject("temp");
+//                    String day = temp.getString("day");
+//                    String night = temp.getString("night");
+//                    String month_name = dfs.getShortMonths()[month];
+//                    String day_name = dfs.getShortWeekdays()[day_of_week+1];
+//                    JSONObject weather = weather_line.getJSONArray("weather").getJSONObject(0);
+//                    String description = weather.getString("description");
+//                    mWeatherTextView.append(day_name + " " +month_name +", "+Integer.toString(day_of_month)+
+//                            " - " + description + " - "+day+"°C / "+night+"°C" + "\n\n\n");
+//                  //  May 28 - Meteors - 16°C / 7°C"
+//
+//                }
+//            } catch (JSONException e) {
+//                Log.e("BRAT", "Error parsing json: " + s);
+//                e.printStackTrace();
+//            }
+//
+//        }
+
+
+
     }
 }
