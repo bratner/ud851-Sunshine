@@ -20,6 +20,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.ShareCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -220,8 +221,22 @@ public class MainActivity extends AppCompatActivity implements ForecastAdapterOn
             loadWeatherData();
             return true;
         }
-
-        // TODO (2) Launch the map when the map menu item is clicked
+        if ( id == R.id.action_map) {
+            Uri.Builder builder = new Uri.Builder();
+            Uri uri = builder.scheme("geo")
+                    .path("0,0")
+                    .build();
+            Intent mapIntent = new Intent(Intent.ACTION_VIEW, uri);
+            if(mapIntent.resolveActivity(getPackageManager())!=null)
+            {
+                startActivity(mapIntent);
+            }
+            else
+            {
+                Log.d("BRAT", "Unable to resolve map intent!");
+            }
+        }
+        // DONE (2) Launch the map when the map menu item is clicked
 
         return super.onOptionsItemSelected(item);
     }
