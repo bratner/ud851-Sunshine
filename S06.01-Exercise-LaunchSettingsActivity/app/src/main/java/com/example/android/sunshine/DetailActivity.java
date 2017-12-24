@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.ShareCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
@@ -18,6 +19,7 @@ public class DetailActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d("BRAT", "DetailActivty: onCreate()"+this.toString());
         setContentView(R.layout.activity_detail);
 
         mWeatherDisplay = (TextView) findViewById(R.id.tv_display_weather);
@@ -55,5 +57,22 @@ public class DetailActivity extends AppCompatActivity {
         return true;
     }
 
-    // TODO (7) Launch SettingsActivity when the Settings option is clicked
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int itemId = item.getItemId();
+
+        if (itemId == R.id.action_settings) {
+            Intent runSettings = new Intent(this, SettingsActivity.class);
+            startActivity(runSettings);
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onDestroy() {
+        Log.d("BRAT", "DetailActivity: onDestroy() "+this.toString());
+        super.onDestroy();
+    }
+    // DONE (7) Launch SettingsActivity when the Settings option is clicked
 }

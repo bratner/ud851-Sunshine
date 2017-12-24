@@ -57,6 +57,7 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d("BRAT", "MainActivty: onCreate()");
         setContentView(R.layout.activity_forecast);
 
         /*
@@ -346,11 +347,18 @@ public class MainActivity extends AppCompatActivity implements
             return true;
         }
 
-        // TODO (1) Add new Activity called SettingsActivity using Android Studio wizard
+        // DONE (1) Add new Activity called SettingsActivity using Android Studio wizard
         // Do step 2 in SettingsActivity
-        // TODO (2) Set setDisplayHomeAsUpEnabled to true on the support ActionBar
+        // DONE (2) Set setDisplayHomeAsUpEnabled to true on the support ActionBar
 
-        // TODO (6) Launch SettingsActivity when the Settings option is clicked
+        if (id == R.id.action_settings) {
+            Intent runSettings = new Intent(this, SettingsActivity.class);
+            runSettings.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(runSettings);
+            return true;
+        }
+
+        // DONE (6) Launch SettingsActivity when the Settings option is clicked
 
         return super.onOptionsItemSelected(item);
     }

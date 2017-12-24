@@ -15,19 +15,21 @@
  */
 package com.example.android.sunshine;
 
-//import android.content.AsyncTaskLoader;
+
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
-//import android.content.Loader;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v4.content.AsyncTaskLoader;
+
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -46,8 +48,7 @@ import java.net.URL;
 // done (1) Implement the proper LoaderCallbacks interface and the methods of that interface
 public class MainActivity extends AppCompatActivity
         implements ForecastAdapterOnClickHandler,
-                   LoaderManager.LoaderCallbacks<String[]>
-{
+        LoaderManager.LoaderCallbacks<String[]> {
     private static final String TAG = MainActivity.class.getSimpleName();
 
     private RecyclerView mRecyclerView;
@@ -58,9 +59,12 @@ public class MainActivity extends AppCompatActivity
     private ProgressBar mLoadingIndicator;
     private String[] mCachedWeatherData;
 
+    private String mALocation;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d("BRAT", "+MainActivity.onCreate()");
         setContentView(R.layout.activity_forecast);
 
         /*
@@ -112,8 +116,18 @@ public class MainActivity extends AppCompatActivity
 
         LoaderManager.enableDebugLogging(true);
 
+        if (savedInstanceState != null) {
+            if (savedInstanceState.containsKey("location"))
+                mALocation = savedInstanceState.getString("location");
+        }
+
+        // loadWeatherData();
+        Log.d("BRAT", "Going to initialize me a loader!");
+        getSupportLoaderManager().initLoader(0xEF, null, this);
+        Log.d("BRAT", "Getting some weather Data!");
         loadWeatherData();
-        Log.d("BRAT", "done with onCreate Activity");
+        Log.d("BRAT", "-MainActivity.onCreate()");
+
     }
 
     /**
@@ -128,9 +142,19 @@ public class MainActivity extends AppCompatActivity
         String location = SunshinePreferences.getPreferredWeatherLocation(this);
         Bundle b = new Bundle();
         b.putString("LOCATION_KEY", location);
-        getSupportLoaderManager().initLoader(0x516B00B5,b,this);
-    }
+        if (mALocation == null || !location.equals(mALocation))
+        {
 
+            getSupportLoaderManager().restartLoader(0xEF, b, this);
+            mALocation = new String(location);
+            Log.d("BRAT", "loadWeatherData() location has changed to "+mALocation);
+        }
+        else
+        {
+            Log.d("BRAT", "loadWeatherData() location has NOT changed!");
+            getSupportLoaderManager().initLoader(0xEF, b, this);
+        }
+    }
 
 
     /**
@@ -177,16 +201,19 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public Loader<String[]> onCreateLoader(int i, final Bundle bundle) {
-        Log.d("BRAT", "MainActivity: onCreateLoader(), id: 0x"+Integer.toString(i,16));
+    public Loader<String[]> onCreateLoader(final int i, final Bundle bundle) {
+        Log.d("BRAT", "MainActivity: onCreateLoader(), id: 0x" + Integer.toHexString(i));
         /* Make a new loader and return it */
 
-            Loader<String[]> ret = new AsyncTaskLoader<String[]>(this) {
-                String mLocation = null;
-                String[] mWeatherData = null;
+
+        @SuppressLint("StaticFieldLeak") //AsyncTaskLoader can't use anything from MainActivity. It may be replaced.
+                Loader<String[]> ret = new AsyncTaskLoader<String[]>(this) {
+            String mLocation = null;
+            String[] mWeatherData = null;
+
             @Override
             public String[] loadInBackground() {
-                Log.d("BRAT", "loadInBackground(): "+bundle.getString("LOCATION_KEY"));
+                Log.d("BRAT", "loadInBackground(): " + bundle.getString("LOCATION_KEY"));
 
                 String location = bundle.getString("LOCATION_KEY");
                 URL weatherRequestUrl = NetworkUtils.buildUrl(location);
@@ -221,24 +248,24 @@ public class MainActivity extends AppCompatActivity
                     return;
                 }
 
-                    mLocation = location;
-                    forceLoad();
+                mLocation = location;
+                forceLoad();
                 // mLoadingIndicator.setVisibility(View.VISIBLE);
             }
 
-                @Override
-                protected void onReset() {
-                    super.onReset();
-                    Log.d("BRAT", "onReset()!");
-                }
+            @Override
+            protected void onReset() {
+                super.onReset();
+                Log.d("BRAT", "onReset()!");
+            }
 
-                @Override
-             public void deliverResult(String[] data) {
-                 super.deliverResult(data);
-                 Log.d("BRAT", "deliverResult()");
-                 mWeatherData = data;
-             }
-         };
+            @Override
+            public void deliverResult(String[] data) {
+                super.deliverResult(data);
+                Log.d("BRAT", "deliverResult()");
+                mWeatherData = data;
+            }
+        };
 
         return ret;
     }
@@ -262,7 +289,7 @@ public class MainActivity extends AppCompatActivity
      * page of Android's developer site:
      *
      * @see <a"http://developer.android.com/guide/components/intents-common.html#Maps">
-     *
+     * <p>
      * Hint: Hold Command on Mac or Control on Windows and click that link
      * to automagically open the Common Intents page
      */
@@ -312,13 +339,25 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     protected void onPause() {
-        super.onPause();
         Log.d("BRAT", "Activity: onPause()");
+        super.onPause();
     }
 
     @Override
     protected void onResume() {
-        super.onResume();
         Log.d("BRAT", "onResume()");
+        super.onResume();
+    }
+
+    @Override
+    protected void onStart() {
+        Log.d("BRAT", "onStart()");
+        super.onStart();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString("location", mALocation);
     }
 }

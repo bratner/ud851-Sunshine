@@ -16,6 +16,13 @@
 package com.example.android.sunshine.data;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
+import android.support.v4.app.SupportActivity;
+import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+
+import com.example.android.sunshine.R;
 
 public class SunshinePreferences {
 
@@ -87,9 +94,18 @@ public class SunshinePreferences {
      * "94043,USA" if SharedPreferences have not been implemented yet.
      */
     public static String getPreferredWeatherLocation(Context context) {
-        // TODO (1) Return the user's preferred location
-        /** This will be implemented in a future lesson **/
-        return getDefaultWeatherLocation();
+        // done (1) Return the user's preferred location
+
+
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+
+        String location = prefs.getString(context.getResources().getString(R.string.pref_location_key),
+                getDefaultWeatherLocation());
+        Log.d("BRAT", "SunshinePreferances: got us a location! " + location);
+        return location;
+
+
+
     }
 
     /**
@@ -100,9 +116,18 @@ public class SunshinePreferences {
      * @return true If metric display should be used
      */
     public static boolean isMetric(Context context) {
-        // TODO (2) Return true if the user's preference for units is metric, false otherwise
-        /** This will be implemented in a future lesson **/
-        return true;
+
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        String units = prefs.getString(context.getResources().getString(R.string.pref_units_key),
+                context.getResources().getString(R.string.pref_units_metric));
+
+        if (units.equals(context.getResources().getString(R.string.pref_units_metric)))
+            return true;
+        else
+            return false;
+
+        // done (2) Return true if the user's preference for units is metric, false otherwise
+
     }
 
     /**
