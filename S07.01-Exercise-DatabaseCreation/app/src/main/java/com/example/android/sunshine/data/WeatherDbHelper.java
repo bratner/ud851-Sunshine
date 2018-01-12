@@ -33,24 +33,36 @@ public class WeatherDbHelper extends SQLiteOpenHelper {
 
     public WeatherDbHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
+
     }
 
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
         final String createSQL = "CREATE TABLE " + WeatherEntry.TABLE_NAME + "("+
-                WeatherEntry._ID + "INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                WeatherEntry.
+                WeatherEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                WeatherEntry.COLUMN_DATE + " DATE NOT NULL, " +
+                WeatherEntry.COLUMN_DEGREES + " REAL NOT NULL, " +
+                WeatherEntry.COLUMN_HUMIDITY + " REAL NOT NULL, " +
+                WeatherEntry.COLUMN_PRESSURE + " REAL NOT NULL, " +
+                WeatherEntry.COLUMN_WIND_SPEED + " REAL NOT NULL, " +
+                WeatherEntry.COLUMN_MAX_TEMP + " REAL NOT NULL, " +
+                WeatherEntry.COLUMN_MIN_TEMP + " REAL NOT NULL, " +
+                WeatherEntry.COLUMN_WEATHER_ID + " INTEGER NOT NULL);";
+        sqLiteDatabase.execSQL(createSQL);
+
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
-
+        final String dropSQL = "DROP TABLE " + WeatherEntry.TABLE_NAME+";";
+        sqLiteDatabase.execSQL(dropSQL);
+        onCreate(sqLiteDatabase);
     }
 
 
 //  DONE (14) Create a constructor that accepts a context and call through to the superclass constructor
 
-//  TODO (15) Override onCreate and create the weather table from within it
+//  DONE (15) Override onCreate and create the weather table from within it
 
 //  DONE (16) Override onUpgrade, but don't do anything within it yet
 }

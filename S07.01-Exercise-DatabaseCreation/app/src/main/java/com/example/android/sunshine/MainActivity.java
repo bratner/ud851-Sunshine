@@ -18,6 +18,7 @@ package com.example.android.sunshine;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
@@ -36,6 +37,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.example.android.sunshine.data.SunshinePreferences;
+import com.example.android.sunshine.data.WeatherDbHelper;
 import com.example.android.sunshine.utilities.NetworkUtils;
 import com.example.android.sunshine.utilities.OpenWeatherJsonUtils;
 
@@ -58,6 +60,7 @@ public class MainActivity extends AppCompatActivity implements
     private static final int FORECAST_LOADER_ID = 0;
 
     private static boolean PREFERENCES_HAVE_BEEN_UPDATED = false;
+    private SQLiteDatabase mDB;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,6 +103,10 @@ public class MainActivity extends AppCompatActivity implements
          */
         mRecyclerView.setHasFixedSize(true);
 
+
+        WeatherDbHelper dbHelper = new WeatherDbHelper(this);
+        mDB = dbHelper.getWritableDatabase();
+        Log.d("BRAT", "So do we have you? " + mDB.toString());
         /*
          * The ForecastAdapter is responsible for linking our weather data with the Views that
          * will end up displaying our weather data.
